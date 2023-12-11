@@ -33,6 +33,9 @@ class client_routes(Namespace) :
             if (client_post.phone_otp_pair[phone] == otp) :
                 token = gen_token()
                 user = client_db.find_user(phone=phone)
+
+                client_db.verify_token(phone = phone, token = token, sid = request.sid)
+                
                 if (user) :
                     client_db.add_token(phone=phone, token=token)
                     if (user['name'] == '') :

@@ -5,7 +5,7 @@ from secrets import choice
 from config import otp_api_key
 
 def gen_otp():
-    return str(randint(100000,999999))
+    return str(randint(1000, 9999))
 
 def send_otp(otp, phone):
     url = 'https://www.fast2sms.com/dev/bulkV2'

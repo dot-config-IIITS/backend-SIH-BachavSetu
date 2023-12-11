@@ -14,12 +14,14 @@ class Temp :
     def __init__(self) -> None:
         self.phone = '9553323388'
         self.token = 'MDVeO7BjL0StpUOJKHUt4tsHnhjWEWFgyChjb9FVBe99PHo771vSgn85a7y5lA9VGXKdQOyLJmsbu6abG2IaHUTtpImseV8HhRqlgQhiNSVxC0PHzarpg096qhV0PvqE'
+
         self.name = 'Hruthik'
         self.blood_group = 'O+'
         self.gender = 'M'
         self.age = '19'
         self.emergency_contact = '123'
         self.relation = 'Hmm'
+        
         self.details = {'name':self.name , 'blood_group':self.blood_group , 'gender':self.gender, 
                         'emergency_contact':self.emergency_contact, 'relation':self.relation, 'age':self.age}
 

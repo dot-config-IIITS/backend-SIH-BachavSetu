@@ -20,14 +20,14 @@ class client_token_database :
                 client_post.sid_phone_pair[sid] = phone
                 if (user['name']!='') :
                     #make changes here...
-                    return {'status':'details filled'}
+                    return {'status':'details_filled'}
                 
                 else :
-                    return {'status':'details not filled'}
+                    return {'status':'details_not_filled'}
             else :
-                return {'status':'token not present'}
+                return {'status':'token_not_present'}
         else :
-            return {'status':'user doesn\'t exist'}
+            return {'status':'user_doesn\'t_exist'}
         
     def add_details(self, phone, name, age, blood_group, gender, emergency_contact, relation) :
         self.db.update_one({'phone':phone},{'$set':{'name':name, 'age':age, 'blood_group':blood_group,
