@@ -1,14 +1,8 @@
-from socketio import Client, ClientNamespace
+from socketio import Client
 from Routes.client_routes import client_routes
 from Routes.admin_routes import admin_routes
 from Routes.rescue_routes import rescue_routes
-# Create a SocketIO client
 
-class client_routes(ClientNamespace) :
-    def on_verify_token_result(data):
-        print(data)
-
-# Connect to the server
 
 sio = Client()
 sio.register_namespace(client_routes('/client'))

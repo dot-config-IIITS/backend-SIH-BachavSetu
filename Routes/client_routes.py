@@ -15,7 +15,7 @@ class client_routes(Namespace) :
     def on_verify_token(self, data) :
         token = data['token']
         phone_no = data['phone_no']
-        emit('verify_token_result',client_db.verify_token(token=token, phone_no=phone_no))
+        emit('verify_token_result', client_db.verify_token(token=token, phone_no=phone_no) , to=request.sid)
         
 # if (token exists) :
 #     try connecting to server with the token 
