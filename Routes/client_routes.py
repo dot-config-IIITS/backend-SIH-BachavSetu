@@ -1,10 +1,11 @@
 from flask_socketio import Namespace, emit
 from flask import request 
 
-from Functions.functions import send_otp, gen_otp
+from Functions.functions import send_otp, gen_otp, gen_token
 
 from config import mongo_uri
-from Database.client_database import client_database
+from Database.client_database import client_database, client_post
+
 client_db = client_database(mongo_uri=mongo_uri)
 
 class client_routes(Namespace) :
@@ -14,8 +15,56 @@ class client_routes(Namespace) :
 
     def on_verify_token(self, data) :
         token = data['token']
-        phone_no = data['phone_no']
-        emit('verify_token_result', client_db.verify_token(token=token, phone_no=phone_no) , to=request.sid)
+        phone = data['phone']
+        emit('verify_token_result', client_db.verify_token(token=token, phone=phone, sid=request.sid) , to=request.sid)
+
+    def on_get_otp(self, data):
+        phone = data['phone']
+        otp = gen_otp()
+        client_post.phone_otp_pair['phone'] = otp 
+        print("HERE")
+        send_otp(phone=phone, otp=otp)
+    
+    def on_verify_otp(self, data) :
+        phone = data['phone']
+        otp = data['otp']
+        if (phone in client_post.phone_otp_pair) :
+            if (client_post.phone_otp_pair[phone] == otp) :
+                token = gen_token()
+                user = client_db.find_one({'phone':phone})
+                if (user) :
+                    client_db.update_one({'phone':phone},{"$push" : {"token":token}})
+                    if (user['name'] == '') :
+                        emit ('verify_otp_result',{'status':'details_not_filled'})
+                    else :
+                        emit ('verify_otp_result',{'status':'details_filled'})
+                else :
+                    client_db.insert_one({'phone':phone, 'tokens':[token] , 
+                                          'name':'', 'age':'', 'blood_group': '',
+                                          'emergency_contact_no':'','relation':''})
+                    emit ('verify_otp_result',{'statys':'details_not_filled'})
+            else :
+                emit('verify_otp_result', {'status':'Wrong OTP'} , to=request.sid)  
+        else :
+            emit('verify_otp_result', {'status':'No OTP is sent to this phone no.'} , to=request.sid)  
+
+    def on_add_details(self, data) :
+        sid = request.sid 
+        if (sid in client_post.sid_phone_pair) :
+            name = data['name']
+            age = data['age']
+            blood_group = data['blood_group']
+            emergency_contact = data['emergency_contact']
+            gender = data['gender']
+            relation = data['relation']
+            if (name and age and blood_group and emergency_contact and relation) :
+                client_db.add_details(phone = client_post.sid_phone_pair[sid], name = name, blood_group = blood_group, 
+                                      gender = gender, emergency_contact = emergency_contact, relation = relation)
+            else :
+                emit('add_details_result',{'status':'One of the fields is empty'}, to=request.sid)
+
+        else :
+            emit('add_details_result',{'status':'token not verified'}, to=request.sid)
         
 # if (token exists) :
 #     try connecting to server with the token 
@@ -26,9 +75,9 @@ class client_routes(Namespace) :
 #             ask for details 
 #             send details..
 #     else : 
-#         ask user to enter phone_no to login
+#         ask user to enter phone to login
 # else :
-#     ask user to enter phone_no to login 
+#     ask user to enter phone to login 
 #     enter otp
 #     if (status != 'auth_fail'): 
 #         save token in local storage (you would get the token in the response 
