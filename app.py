@@ -1,8 +1,14 @@
 from flask import Flask
 from flask_socketio import SocketIO
+from config import mongo_uri
 
 app = Flask(__name__)
 socketio = SocketIO(app)
+
+
+# client_ssids = {}
+# admin_ssids = {}
+# rescue_ssids = {}
 
 from Routes.admin_routes import admin_routes
 from Routes.client_routes import client_routes
