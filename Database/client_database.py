@@ -2,13 +2,14 @@ from pymongo import MongoClient
 
 class SIDS_OTPS :
     def __init__(self) -> None:
-        self.phone_otp_pair = {}
+        # self.phone_otp_pair = {'9553323388':'123456'}
+        self.sid_phone_pair = {}
         self.sid_phone_pair = {}
 
 # P-->phone S->SID, O->OTP, T->TOKEN
 client_post = SIDS_OTPS()
 
-class client_database :
+class client_token_database :
     def __init__(self, mongo_uri) -> None:
         self.db = MongoClient(mongo_uri)['BachavSetu']['client']
     
@@ -29,12 +30,19 @@ class client_database :
             return {'status':'user doesn\'t exist'}
         
     def add_details(self, phone, name, age, blood_group, gender, emergency_contact, relation) :
-        if (self.db.update_one({'phone':phone},{'$set':{'name':name, 'age':age, 'blood_group':blood_group,
+        self.db.update_one({'phone':phone},{'$set':{'name':name, 'age':age, 'blood_group':blood_group,
                                                     'gender':gender, 'emergency_contact':emergency_contact,
-                                                     'relation':relation }}) ) > 0 :
-            return {'status':'success'}
-        else :
-            return {'status':'user not found'}
+                                                     'relation':relation }}) 
+    def find_user(self, phone) :
+        return self.db.find_one({'phone':phone})
+    
+    def add_token(self, phone, token) :
+        self.db.update_one({'phone':phone},{"$push" : {"token":token}})
+
+    def add_user(self, phone, token) :
+        self.db.insert_one({'phone':phone, 'tokens':[token] , 
+                            'name':'', 'age':'', 'blood_group': '',
+                            'emergency_contact':'','relation':''})
 
     # def user_exists(self, phone, type) :
     #     collection = None

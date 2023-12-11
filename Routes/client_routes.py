@@ -21,28 +21,27 @@ class client_routes(Namespace) :
     def on_get_otp(self, data):
         phone = data['phone']
         otp = gen_otp()
-        client_post.phone_otp_pair['phone'] = otp 
-        print("HERE")
+        client_post.phone_otp_pair[phone] = otp 
+        print(client_post.phone_otp_pair)
         send_otp(phone=phone, otp=otp)
     
     def on_verify_otp(self, data) :
+        print(client_post.phone_otp_pair)
         phone = data['phone']
         otp = data['otp']
         if (phone in client_post.phone_otp_pair) :
             if (client_post.phone_otp_pair[phone] == otp) :
                 token = gen_token()
-                user = client_db.find_one({'phone':phone})
+                user = client_db.find_user(phone=phone)
                 if (user) :
-                    client_db.update_one({'phone':phone},{"$push" : {"token":token}})
+                    client_db.add_token(phone=phone, token=token)
                     if (user['name'] == '') :
-                        emit ('verify_otp_result',{'status':'details_not_filled'})
+                        emit ('verify_otp_result',{'status':'details_not_filled','token':token})
                     else :
-                        emit ('verify_otp_result',{'status':'details_filled'})
+                        emit ('verify_otp_result',{'status':'details_filled','token':token})
                 else :
-                    client_db.insert_one({'phone':phone, 'tokens':[token] , 
-                                          'name':'', 'age':'', 'blood_group': '',
-                                          'emergency_contact_no':'','relation':''})
-                    emit ('verify_otp_result',{'statys':'details_not_filled'})
+                    client_db.add_user(phone=phone,token=token)
+                    emit ('verify_otp_result',{'status':'details_not_filled', 'token':token})
             else :
                 emit('verify_otp_result', {'status':'Wrong OTP'} , to=request.sid)  
         else :
@@ -59,7 +58,8 @@ class client_routes(Namespace) :
             relation = data['relation']
             if (name and age and blood_group and emergency_contact and relation) :
                 client_db.add_details(phone = client_post.sid_phone_pair[sid], name = name, blood_group = blood_group, 
-                                      gender = gender, emergency_contact = emergency_contact, relation = relation)
+                                      gender = gender, emergency_contact = emergency_contact, relation = relation, age=age)
+                emit('add_details_result',{'status':'success'})
             else :
                 emit('add_details_result',{'status':'One of the fields is empty'}, to=request.sid)
 
