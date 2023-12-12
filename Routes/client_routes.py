@@ -26,7 +26,6 @@ class client_routes(Namespace) :
         # send_otp(phone=phone, otp=otp)
     
     def on_verify_otp(self, data) :
-        print(client_post.phone_otp_pair)
         phone = data['phone']
         otp = data['otp']
         if (phone in client_post.phone_otp_pair) :

@@ -3,20 +3,21 @@ from pymongo import MongoClient
 class SIDS_OTPS :
     def __init__(self) -> None:
         # self.phone_otp_pair = {'9553323388':'123456'}
-        self.sid_phone_pair = {}
+        # self.sid_phone_pair = {}
+        self.phone_otp_pair = {}
         self.sid_phone_pair = {}
 
 # P-->phone S->SID, O->OTP, T->TOKEN
 client_post = SIDS_OTPS()
 
-class client_token_database :
+class client_database :
     def __init__(self, mongo_uri) -> None:
         self.db = MongoClient(mongo_uri)['BachavSetu']['client']
     
     def verify_token(self, phone, token, sid) :
         user = self.db.find_one({'phone':phone})
         if (user) :
-            if (token in user['tokens']) :
+            if (token == user['token']) :
                 client_post.sid_phone_pair[sid] = phone
                 if (user['name']!='') :
                     #make changes here...
@@ -37,10 +38,10 @@ class client_token_database :
         return self.db.find_one({'phone':phone})
     
     def add_token(self, phone, token) :
-        self.db.update_one({'phone':phone},{"$push" : {"token":token}})
+        self.db.update_one({'phone':phone},{"$set" : {"token":token}})
 
     def add_user(self, phone, token) :
-        self.db.insert_one({'phone':phone, 'tokens':[token] , 
+        self.db.insert_one({'phone':phone, 'token':token , 
                             'name':'', 'age':'', 'blood_group': '',
                             'emergency_contact':'','relation':''})
 

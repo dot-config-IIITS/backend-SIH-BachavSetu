@@ -13,7 +13,7 @@ sio.register_namespace(admin_routes('/admin'))
 class Temp :
     def __init__(self) -> None:
         self.phone = '9553323388'
-        self.token = 'MDVeO7BjL0StpUOJKHUt4tsHnhjWEWFgyChjb9FVBe99PHo771vSgn85a7y5lA9VGXKdQOyLJmsbu6abG2IaHUTtpImseV8HhRqlgQhiNSVxC0PHzarpg096qhV0PvqE'
+        self.token = 'hNWco7srQ1UltEErHqEs9RR1DWtBGRQCxnd1E7OVF8zPPjSTNhzYhS8Wme9K04K1RfmZOlLRvUVW4so5tqxV6RoFuepQgteLDkzEe5wHM5ruc0cC4NtAH8etd7rtIoY5'
 
         self.name = 'Hruthik'
         self.blood_group = 'O+'
@@ -29,7 +29,7 @@ if __name__ == '__main__' :
     temp = Temp()
     sio.connect('http://localhost:5000', namespaces=['/client'])
     # sio.emit('get_otp',{'phone':'9553323388'}, namespace='/client')
-    # sio.emit('verify_otp', {'phone':'9553323388','otp':'123456'}, namespace='/client')
+    # sio.emit('verify_otp', {'phone':'9553323388','otp':'2662'}, namespace='/client')
     sio.emit('verify_token',{'phone':temp.phone,'token':temp.token}, namespace='/client')
     sio.emit('add_details',temp.details,namespace='/client')
     sio.wait()
