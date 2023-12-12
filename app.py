@@ -1,6 +1,5 @@
 from flask import Flask
 from flask_socketio import SocketIO
-from config import mongo_uri
 
 app = Flask(__name__)
 socketio = SocketIO(app)
@@ -14,4 +13,4 @@ socketio.on_namespace(client_routes('/client'))
 socketio.on_namespace(rescue_routes('/rescue'))
 
 if __name__ == '__main__':
-    socketio.run(app, debug=False)
+    socketio.run(app, debug=True)

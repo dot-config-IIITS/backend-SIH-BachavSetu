@@ -9,6 +9,9 @@ from Database.client_database import client_database, client_post
 client_db = client_database(mongo_uri=mongo_uri)
 
 class client_routes(Namespace) :
+    def on_connect(self):
+        print("hell yeah")
+
     def on_disconnect(self) :
         client_post.pop(request.sid)
 
@@ -40,7 +43,10 @@ class client_routes(Namespace) :
                     if (user['name'] == '') :
                         emit ('verify_otp_result',{'status':'details_not_filled','token':token}, to=request.sid)
                     else :
-                        emit ('verify_otp_result',{'status':'details_filled','token':token}, to=request.sid)
+                        emit_data = {'status':'details_filled','token':token ,
+                                     'name':user['name'], 'blood_group':user['blood_group'], 'emergency_contact':user['emergency_contact'],
+                                     'relation':user['relation'], 'age':user['age'], 'gender':user['gender']}
+                        emit ('verify_otp_result',emit_data, to=request.sid)
                 else :
                     client_db.add_user(phone=phone,token=token)
                     emit ('verify_otp_result',{'status':'details_not_filled', 'token':token}, to=request.sid)

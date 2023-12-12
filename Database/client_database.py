@@ -18,11 +18,13 @@ class client_database :
         user = self.db.find_one({'phone':phone})
         if (user) :
             if (token == user['token']) :
+                #Binding sid to phone no
                 client_post.sid_phone_pair[sid] = phone
+
                 if (user['name']!='') :
-                    #make changes here...
-                    return {'status':'details_filled'}
-                
+                    return {'status':'details_filled',
+                            'name':user['name'], 'blood_group':user['blood_group'], 'emergency_contact':user['emergency_contact'],
+                            'relation':user['relation'], 'age':user['age'], 'gender':user['gender']}
                 else :
                     return {'status':'details_not_filled'}
             else :
