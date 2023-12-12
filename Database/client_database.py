@@ -26,7 +26,7 @@ class client_database :
                 else :
                     return {'status':'details_not_filled'}
             else :
-                return {'status':'token_not_present'}
+                return {'status':'wrong_token'}
         else :
             return {'status':'user_doesn\'t_exist'}
         
@@ -37,7 +37,7 @@ class client_database :
     def find_user(self, phone) :
         return self.db.find_one({'phone':phone})
     
-    def add_token(self, phone, token) :
+    def update_token(self, phone, token) :
         self.db.update_one({'phone':phone},{"$set" : {"token":token}})
 
     def add_user(self, phone, token) :

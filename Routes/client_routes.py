@@ -10,8 +10,7 @@ client_db = client_database(mongo_uri=mongo_uri)
 
 class client_routes(Namespace) :
     def on_disconnect(self) :
-        sid = request.sid
-        pass 
+        client_post.pop(request.sid)
 
     def on_verify_token(self, data) :
         token = data['token']
@@ -33,17 +32,18 @@ class client_routes(Namespace) :
                 token = gen_token()
                 user = client_db.find_user(phone=phone)
 
-                client_db.verify_token(phone = phone, token = token, sid = request.sid)
+                # Binding the request sid to the phone no
+                client_post.sid_phone_pair[request.sid] = phone 
 
                 if (user) :
-                    client_db.add_token(phone=phone, token=token)
+                    client_db.update_token(phone=phone, token=token)
                     if (user['name'] == '') :
-                        emit ('verify_otp_result',{'status':'details_not_filled','token':token})
+                        emit ('verify_otp_result',{'status':'details_not_filled','token':token}, to=request.sid)
                     else :
-                        emit ('verify_otp_result',{'status':'details_filled','token':token})
+                        emit ('verify_otp_result',{'status':'details_filled','token':token}, to=request.sid)
                 else :
                     client_db.add_user(phone=phone,token=token)
-                    emit ('verify_otp_result',{'status':'details_not_filled', 'token':token})
+                    emit ('verify_otp_result',{'status':'details_not_filled', 'token':token}, to=request.sid)
             else :
                 emit('verify_otp_result', {'status':'Wrong OTP'} , to=request.sid)  
         else :

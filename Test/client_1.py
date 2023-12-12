@@ -30,8 +30,8 @@ if __name__ == '__main__' :
     sio.connect('http://localhost:5000', namespaces=['/client'])
     # sio.emit('get_otp',{'phone':'9553323388'}, namespace='/client')
     # sio.emit('verify_otp', {'phone':'9553323388','otp':'2662'}, namespace='/client')
-    sio.emit('verify_token',{'phone':temp.phone,'token':temp.token}, namespace='/client')
-    sio.emit('add_details',temp.details,namespace='/client')
+    # sio.emit('verify_token',{'phone':temp.phone,'token':temp.token}, namespace='/client')
+    # sio.emit('add_details',temp.details,namespace='/client')
     sio.wait()
 
 #LOnfoiherh
