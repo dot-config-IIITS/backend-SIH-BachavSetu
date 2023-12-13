@@ -3,6 +3,14 @@
 {  
    "states":[  
       {  
+         "state":"Andaman and Nicobar Islands",
+         "districts":[  
+            "Nicobars",
+            "North And Middle Andaman",
+            "South Andamans"
+         ]
+      },
+      {  
          "state":"Andhra Pradesh",
          "districts":[  
             "Anantapur",
@@ -394,7 +402,14 @@
          ]
       },
       {  
-         "state":"Lakshadweep (UT)",
+         "state":"Ladakh",
+         "districts":[  
+            "Kargil", 
+            "Leh Ladakh"
+         ]
+      },
+      {  
+         "state":"Lakshadweep",
          "districts":[  
             "Agatti",
             "Amini",

@@ -10,7 +10,7 @@ client_db = client_database(mongo_uri=mongo_uri)
 
 class client_routes(Namespace) :
     def on_connect(self):
-        print("hell yeah")
+        print("Client name space connected")
 
     def on_disconnect(self) :
         client_post.pop(request.sid)
@@ -45,7 +45,7 @@ class client_routes(Namespace) :
                     else :
                         emit_data = {'status':'details_filled','token':token ,
                                      'name':user['name'], 'blood_group':user['blood_group'], 'emergency_contact':user['emergency_contact'],
-                                     'relation':user['relation'], 'age':user['age'], 'gender':user['gender']}
+                                     'relation':user['relation'], 'dob':user['dob'], 'gender':user['gender']}
                         emit ('verify_otp_result',emit_data, to=request.sid)
                 else :
                     client_db.add_user(phone=phone,token=token)
@@ -59,14 +59,14 @@ class client_routes(Namespace) :
         sid = request.sid 
         if (sid in client_post.sid_phone_pair) :
             name = data['name']
-            age = data['age']
+            dob = data['dob']
             blood_group = data['blood_group']
             emergency_contact = data['emergency_contact']
             gender = data['gender']
             relation = data['relation']
-            if (name and age and blood_group and emergency_contact and relation) :
+            if (name and dob and blood_group and emergency_contact and relation) :
                 client_db.add_details(phone = client_post.sid_phone_pair[sid], name = name, blood_group = blood_group, 
-                                      gender = gender, emergency_contact = emergency_contact, relation = relation, age=age)
+                                      gender = gender, emergency_contact = emergency_contact, relation = relation, dob=dob)
                 emit('add_details_result',{'status':'success'})
             else :
                 emit('add_details_result',{'status':'One of the fields is empty'}, to=request.sid)

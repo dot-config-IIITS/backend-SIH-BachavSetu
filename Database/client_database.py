@@ -24,7 +24,7 @@ class client_database :
                 if (user['name']!='') :
                     return {'status':'details_filled',
                             'name':user['name'], 'blood_group':user['blood_group'], 'emergency_contact':user['emergency_contact'],
-                            'relation':user['relation'], 'age':user['age'], 'gender':user['gender']}
+                            'relation':user['relation'], 'dob':user['dob'], 'gender':user['gender']}
                 else :
                     return {'status':'details_not_filled'}
             else :
@@ -32,8 +32,8 @@ class client_database :
         else :
             return {'status':'user_doesn\'t_exist'}
         
-    def add_details(self, phone, name, age, blood_group, gender, emergency_contact, relation) :
-        self.db.update_one({'phone':phone},{'$set':{'name':name, 'age':age, 'blood_group':blood_group,
+    def add_details(self, phone, name, dob, blood_group, gender, emergency_contact, relation) :
+        self.db.update_one({'phone':phone},{'$set':{'name':name, 'dob':dob, 'blood_group':blood_group,
                                                     'gender':gender, 'emergency_contact':emergency_contact,
                                                      'relation':relation }}) 
     def find_user(self, phone) :
@@ -44,7 +44,7 @@ class client_database :
 
     def add_user(self, phone, token) :
         self.db.insert_one({'phone':phone, 'token':token , 
-                            'name':'', 'age':'', 'blood_group': '',
+                            'name':'', 'dob':'', 'blood_group': '',
                             'emergency_contact':'','relation':''})
 
     # def user_exists(self, phone, type) :
