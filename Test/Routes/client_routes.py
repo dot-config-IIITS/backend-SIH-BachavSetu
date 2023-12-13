@@ -5,8 +5,8 @@ class Temp :
         self.phone = '9553323388'
         self.token = ''
 
-        self.name = 'Hruthik'
-        self.blood_group = 'O+'
+        self.name = 'We don\'t care'
+        self.blood_group = 'Sigala'
         self.gender = 'M'
         self.dob= '19'
         self.emergency_contact = '123'
