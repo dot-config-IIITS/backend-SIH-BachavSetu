@@ -1,4 +1,4 @@
 Flask==3.0.0
 Flask-SocketIO==5.3.6
-pymonogo==4.5.0
+pymonogo==4.6.1
 requests==2.31.0
