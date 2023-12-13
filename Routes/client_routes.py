@@ -9,11 +9,34 @@ from Database.client_database import client_database, client_post
 client_db = client_database(mongo_uri=mongo_uri)
 
 class client_routes(Namespace) :
+
+    def on_logout(self) : 
+        sid = request.sid
+        if (sid in client_post.sid_phone_pair) :
+            phone = client_post.sid_phone_pair[sid]
+            client_db.update_token(phone=phone, token='')
+            client_post.sid_phone_pair.pop(request.sid)
+            emit('logout_result',{'status':'success'}, to=sid)
+        else :
+            emit('logout_result', {'status':'Verify token first'}, to=sid)
+
+    def on_submit_feedback(self, data) :
+        sid = request.sid
+        if (sid in client_post) :
+            phone = client_post[sid]
+            emit ('submit_feedback_result',client_db.submit_feedback(phone = phone, feedback = data['feedback'],
+                                                                     state = data['state'], district = data['district']))
+        else :
+            emit ('submit_feedback_result',{'status':'Verify token first'})
+
+
     def on_connect(self):
         print("Client name space connected")
 
     def on_disconnect(self) :
-        client_post.pop(request.sid)
+        sid = request.sid
+        if (sid in client_post.sid_phone_pair):
+            client_post.sid_phone_pair.pop(sid)
 
     def on_verify_token(self, data) :
         token = data['token']
@@ -98,3 +121,8 @@ class client_routes(Namespace) :
 #     else :
 #         wrong_otp..
 
+# 1. User Profile (Load at starting of the app)
+# 2. Submit disaster 
+# photo, video, description
+# 3. Send Feedback
+# 4. Logout route

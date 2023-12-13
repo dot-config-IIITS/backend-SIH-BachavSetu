@@ -17,7 +17,7 @@ class client_database :
     def verify_token(self, phone, token, sid) :
         user = self.db.find_one({'phone':phone})
         if (user) :
-            if (token == user['token']) :
+            if (token == user['token'] and token != '') :
                 #Binding sid to phone no
                 client_post.sid_phone_pair[sid] = phone
 
@@ -46,6 +46,19 @@ class client_database :
         self.db.insert_one({'phone':phone, 'token':token , 
                             'name':'', 'dob':'', 'blood_group': '',
                             'emergency_contact':'','relation':''})
+        
+    # have to update this...
+    def submit_feedback(self, phone, feedback, state, district) :
+        if (state in states) :
+            if (district in districts) :
+                self.db.update_one({'phone':phone},{'$push':{'feedbacks':feedback}})
+                feedback_id = feedback_db.insert_one({'state':state, 'district':district, 'feedback':feedback, 'phone':phone}).inserted_id
+                admin_db.add_feedback(state = state, district = district, feedback_id = feedback_id)
+                rescue_db.add_feedback(state = state, district = district, feedback_id = feedback_id)
+            else :
+                return {'status':'Invalid district'}
+        else : 
+            return {'status':'Invalid State'}
 
     # def user_exists(self, phone, type) :
     #     collection = None
@@ -59,3 +72,5 @@ class client_database :
     #         return 1
     #     else :
     #         return 0
+
+    #LatLan(13.5553, 80.0267)
