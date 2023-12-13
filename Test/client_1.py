@@ -27,6 +27,7 @@ if __name__ == '__main__' :
     sio.emit('get_otp',{'phone':'9553323388'}, namespace='/client')
     otp = input("Enter otp : ")
     sio.emit('verify_otp', {'phone':'9553323388','otp':otp}, namespace='/client')
+    input("Waiting..")
     
     # sio.emit('verify_token',{'phone':temp.phone,'token':temp.token}, namespace='/client')
     sio.emit('add_details',temp.details,namespace='/client')

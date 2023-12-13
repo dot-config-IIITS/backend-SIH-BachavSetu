@@ -37,9 +37,9 @@ class client_routes(Namespace) :
         else :
             emit ('submit_feedback_result',{'status':'Verify token first'})
 
-
     def on_connect(self):
-        print("Client name space connected")
+        logger.warning("Client name space connected")
+        # print("Client name space connected")
 
     def on_disconnect(self) :
         sid = request.sid
@@ -55,8 +55,8 @@ class client_routes(Namespace) :
         phone = data['phone']
         otp = gen_otp()
         client_post.phone_otp_pair[phone] = otp 
-        logger.warning(phone+' : '+client_post.phone_otp_pair[phone])
-        # send_otp(phone=phone, otp=otp)
+        # logger.warning(phone+' : '+client_post.phone_otp_pair[phone])
+        send_otp(phone=phone, otp=otp)
     
     def on_verify_otp(self, data) :
         phone = data['phone']
