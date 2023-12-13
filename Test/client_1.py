@@ -15,9 +15,7 @@ from Routes.client_routes import temp
 
 if __name__ == '__main__' :
     sio.connect('http://localhost:5000', namespaces=['/client'])
-    print("connected")
     sio.emit('get_otp',{'phone':'9553323388'}, namespace='/client')
-    print("exec 1")
     otp = input("Enter otp : ")
     sio.emit('verify_otp', {'phone':'9553323388','otp':otp}, namespace='/client')
     

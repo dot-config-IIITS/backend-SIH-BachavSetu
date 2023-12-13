@@ -13,4 +13,4 @@ socketio.on_namespace(client_routes('/client'))
 socketio.on_namespace(rescue_routes('/rescue'))
 
 if __name__ == '__main__':
-    socketio.run(app, debug=True)
+    socketio.run(app, debug=False)
