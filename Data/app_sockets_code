@@ -1,0 +1,13 @@
+  IO.Socket _socket = IO.io('https://bachavsetu.onrender.com/client',
+      IO.OptionBuilder().setTransports(['websocket']).build());
+  _socket.onConnect((_) {
+    print("Connection Established");
+    _socket.emit('get_otp', {'phone': '9553323388'});
+  });
+  _socket.onConnectError((data) => print('Connect error: $data'));
+  _socket.onDisconnect((data) => print("Socket IO server disconnected"));
+  _socket.onDisconnect((data) {
+    _socket.disconnect();
+    print("Socket IO server disconnected");
+  });
+}

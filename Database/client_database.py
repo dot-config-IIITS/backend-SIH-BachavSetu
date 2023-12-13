@@ -18,7 +18,7 @@ class client_database :
         user = self.db.find_one({'phone':phone})
         if (user) :
             if (token == user['token'] and token != '') :
-                #Binding sid to phone no
+                # Binding sid to phone no
                 client_post.sid_phone_pair[sid] = phone
 
                 if (user['name']!='') :

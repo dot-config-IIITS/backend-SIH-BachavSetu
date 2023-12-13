@@ -1,10 +1,11 @@
 from flask_socketio import Namespace, emit
 from flask import request 
 from logging import getLogger, DEBUG, StreamHandler, Formatter
+from os import environ
 
 from Functions.functions import send_otp, gen_otp, gen_token
 
-from config import mongo_uri
+from config import mongo_uri, system_states
 from Database.client_database import client_database, client_post
 
 client_db = client_database(mongo_uri=mongo_uri)
@@ -12,7 +13,7 @@ client_db = client_database(mongo_uri=mongo_uri)
 logger = getLogger(__name__)
 logger.setLevel(DEBUG)
 handler = StreamHandler()
-formatter = Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+formatter = Formatter('%(message)s')
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 
@@ -39,7 +40,6 @@ class client_routes(Namespace) :
 
     def on_connect(self):
         logger.warning("Client name space connected")
-        # print("Client name space connected")
 
     def on_disconnect(self) :
         sid = request.sid
@@ -55,8 +55,15 @@ class client_routes(Namespace) :
         phone = data['phone']
         otp = gen_otp()
         client_post.phone_otp_pair[phone] = otp 
-        # logger.warning(phone+' : '+client_post.phone_otp_pair[phone])
-        send_otp(phone=phone, otp=otp)
+        
+        if (system_states.SEND_OTP == None) :
+            # send_otp(phone=phone, otp=otp)
+            logger.warning('Phone : '+phone+' | OTP : '+otp)
+
+        if (environ.get('SEND_OTP') == 'TRUE') :
+            send_otp(phone=phone, otp=otp)
+        else:
+            logger.warning('Phone : '+phone+' | OTP : '+otp)
     
     def on_verify_otp(self, data) :
         phone = data['phone']
@@ -134,3 +141,12 @@ class client_routes(Namespace) :
 # photo, video, description
 # 3. Send Feedback
 # 4. Logout route
+
+
+# Local  : 
+#     addr for VM      : 'http://10.0.2.2:5000/client'
+#     addr for phycial : 'http://laptops_ip_add:5000/client'
+#     (for physical + local, laptop, phone have to be on same network)
+
+# Cloud  :
+#     addr for VM, physical : 'http://bachavsetu.onrender.com:5000/client'
