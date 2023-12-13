@@ -60,7 +60,7 @@ class client_routes(Namespace) :
             # send_otp(phone=phone, otp=otp)
             logger.warning('Phone : '+phone+' | OTP : '+otp)
 
-        if (environ.get('SEND_OTP') == 'TRUE') :
+        if (system_states.SEND_OTP == 'TRUE') :
             send_otp(phone=phone, otp=otp)
         else:
             logger.warning('Phone : '+phone+' | OTP : '+otp)
@@ -149,4 +149,5 @@ class client_routes(Namespace) :
 #     (for physical + local, laptop, phone have to be on same network)
 
 # Cloud  :
-#     addr for VM, physical : 'http://bachavsetu.onrender.com:5000/client'
+#     addr for VM, physical : 'http://bachavsetu.onrender.com/client'
+#                              Its is .com/client and not .com:5000/client

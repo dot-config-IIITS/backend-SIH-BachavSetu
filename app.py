@@ -17,9 +17,4 @@ def notify_server_status():
     return "Server is up"
 
 if __name__ == '__main__':
-    # if (system_states.RUNNING_ON_SERVER == 'TRUE') : 
-    #     # For server deployment
-    #     socketio.run(app,  host='0.0.0.0', port=80, debug=True, allow_unsafe_werkzeug=True)
-    # else :
-    #     # For local deployment
         socketio.run(app,  host='0.0.0.0', port=5000, debug=True, allow_unsafe_werkzeug=True)
