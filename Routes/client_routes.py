@@ -1,5 +1,6 @@
 from flask_socketio import Namespace, emit
 from flask import request 
+from logging import getLogger, DEBUG, StreamHandler, Formatter
 
 from Functions.functions import send_otp, gen_otp, gen_token
 
@@ -7,6 +8,13 @@ from config import mongo_uri
 from Database.client_database import client_database, client_post
 
 client_db = client_database(mongo_uri=mongo_uri)
+
+logger = getLogger(__name__)
+logger.setLevel(DEBUG)
+handler = StreamHandler()
+formatter = Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
 
 class client_routes(Namespace) :
 
@@ -47,7 +55,7 @@ class client_routes(Namespace) :
         phone = data['phone']
         otp = gen_otp()
         client_post.phone_otp_pair[phone] = otp 
-        print(phone, client_post.phone_otp_pair[phone])
+        logger.warning(phone+' : '+client_post.phone_otp_pair[phone])
         # send_otp(phone=phone, otp=otp)
     
     def on_verify_otp(self, data) :

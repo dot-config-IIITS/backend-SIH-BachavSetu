@@ -14,11 +14,16 @@ sio.register_namespace(admin_routes('/admin'))
 from Routes.client_routes import temp
 
 if __name__ == '__main__' :
+    #Server deployment
     sio.connect('https://bachavsetu.onrender.com',namespaces=['/client'])
+
+    #Local deployment
+    # sio.connect('http://localhost:5000', namespaces=['/client'])
+
     sio.reconnection = True
     sio.reconnection_attempts = float('inf')
     sio.reconnection_delay = 1
-    # sio.connect('http://localhost:5000', namespaces=['/client'])
+
     sio.emit('get_otp',{'phone':'9553323388'}, namespace='/client')
     otp = input("Enter otp : ")
     sio.emit('verify_otp', {'phone':'9553323388','otp':otp}, namespace='/client')

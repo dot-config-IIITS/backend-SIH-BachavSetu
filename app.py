@@ -18,4 +18,8 @@ def hello_world():
     return "Hi guys"
 
 if __name__ == '__main__':
+    # For server deployment
     socketio.run(app,  host='0.0.0.0', port=80, debug=True, allow_unsafe_werkzeug=True)
+
+    # For local deployment
+    # socketio.run(app,  host='0.0.0.0', port=5000, debug=True, allow_unsafe_werkzeug=True)
