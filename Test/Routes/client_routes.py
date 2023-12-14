@@ -21,9 +21,16 @@ class client_routes(ClientNamespace) :
     def on_verify_token_result(self, data):
         if ('token' in data) :
             temp.token = data['token']
+        print("verify_token_result : ",data)
 
     def on_verify_otp_result(self, data):
-        print(data)
+        print("verify_otp_result : ",data)
 
     def on_add_details_result(self, data): 
-        print(data)
+        print("add_details_result : ",data)
+    
+    def on_logout_result(self, data) :
+        print("logout_result : ",data)        
+
+    def on_submit_feedback_result(self, data) :
+        print("submit_feedback_result : ",data)

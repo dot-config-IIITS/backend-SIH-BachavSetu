@@ -2,9 +2,14 @@
 mongo_uri = 'mongodb+srv://config:9P69890RJtTCy4LC@sih-config-bachavsetu.1vngw8a.mongodb.net/'
 otp_api_key = 'jLHunk24gxzMSisYrIdGqpENTUWFyZw7oQmtK0v8bO63hXacf11Gnhe3yQRYP4xv0rLckIH9aSwbfg62'
 
-from os import environ
-class States :
-    def __init__(self) -> None:
-        self.SEND_OTP = environ.get('SEND_OTP')
+from logging import getLogger, DEBUG, StreamHandler, Formatter
+logger = getLogger(__name__)
+logger.setLevel(DEBUG)
+handler = StreamHandler()
+formatter = Formatter('%(message)s')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
 
-system_states = States()
+from os import environ
+class system_states :
+    SEND_OTP = environ.get('SEND_OTP')

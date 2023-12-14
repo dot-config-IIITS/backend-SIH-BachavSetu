@@ -1,22 +1,20 @@
 from pymongo import MongoClient
+from config import mongo_uri
 
-class SIDS_OTPS:
-    def __init__(self) -> None:
-        self.phone_otp_pair = {}
-        self.sid_phone_pair = {}
+class rescue_pos:
+    phone_otp_pair = {}
+    sid_phone_pair = {}
 
-rescue_post = SIDS_OTPS()
 
 class rescue_database :
-    def __init__(self, mongo_uri) -> None:
-        self.db = MongoClient(mongo_uri)['BachavSetu']['rescue']
+    db = MongoClient(mongo_uri)['BachavSetu']['rescue']
 
     def verify_token(self, phone, token, sid) :
         user = self.db.find_one({'phone':phone})
         if (user) :
             if (token == user['token']) :
                 #binding request.sid with phone no
-                rescue_post.sid_phone_pair[sid] = phone
+                rescue_pos.sid_phone_pair[sid] = phone
                 
                 return {'status':'success'}
             else :
@@ -24,8 +22,15 @@ class rescue_database :
         else :
             return {'status':'user_doesn\'t_exist'}
         
-    def find_user(self, phone) :
-        return self.db.find_one({'phone':phone})
-    
-    def update_token(self, phone, token) :
-        self.db.update_one({'phone':phone},{"$set" : {"token":token}})    
+    def find_rescue(phone) :
+        return rescue_database.db.find_one({'phone':phone})
+
+    # def add_feedback(feedback_id, state, district) :
+    #     rescue_database.db.update_one({'state':state, 'district':district}, {'$push':{'feedback_ids':feedback_id}})
+
+    #To be used only from admin_database
+    def add_rescue(state, district, phone) :
+        rescue_database.db.insert_one({'state':state, 'district':district, 'phone':phone}) 
+
+    def update_token(phone, token) :
+        rescue_database.db.update_one({'phone':phone},{"$set" : {"token":token}})    

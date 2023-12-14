@@ -1,39 +1,27 @@
 from flask_socketio import Namespace, emit
 from flask import request 
-from logging import getLogger, DEBUG, StreamHandler, Formatter
-from os import environ
 
+from config import system_states, logger
 from Functions.functions import send_otp, gen_otp, gen_token
-
-from config import mongo_uri, system_states
-from Database.client_database import client_database, client_post
-
-client_db = client_database(mongo_uri=mongo_uri)
-
-logger = getLogger(__name__)
-logger.setLevel(DEBUG)
-handler = StreamHandler()
-formatter = Formatter('%(message)s')
-handler.setFormatter(formatter)
-logger.addHandler(handler)
+from Database.client_database import client_database, client_pos
 
 class client_routes(Namespace) :
 
     def on_logout(self) : 
         sid = request.sid
-        if (sid in client_post.sid_phone_pair) :
-            phone = client_post.sid_phone_pair[sid]
-            client_db.update_token(phone=phone, token='')
-            client_post.sid_phone_pair.pop(request.sid)
+        if (sid in client_pos.sid_phone_pair) :
+            phone = client_pos.sid_phone_pair[sid]
+            client_database.update_token(phone=phone, token='')
+            client_pos.sid_phone_pair.pop(request.sid)
             emit('logout_result',{'status':'success'}, to=sid)
         else :
             emit('logout_result', {'status':'Verify token first'}, to=sid)
 
     def on_submit_feedback(self, data) :
         sid = request.sid
-        if (sid in client_post) :
-            phone = client_post[sid]
-            emit ('submit_feedback_result',client_db.submit_feedback(phone = phone, feedback = data['feedback'],
+        if (sid in client_pos.sid_phone_pair) :
+            phone = client_pos.sid_phone_pair[sid]
+            emit ('submit_feedback_result',client_database.submit_feedback(phone = phone, feedback = data['feedback'],
                                                                      state = data['state'], district = data['district']))
         else :
             emit ('submit_feedback_result',{'status':'Verify token first'})
@@ -43,24 +31,24 @@ class client_routes(Namespace) :
 
     def on_disconnect(self) :
         sid = request.sid
-        if (sid in client_post.sid_phone_pair):
-            client_post.sid_phone_pair.pop(sid)
+        if (sid in client_pos.sid_phone_pair):
+            client_pos.sid_phone_pair.pop(sid)
 
     def on_verify_token(self, data) :
         token = data['token']
         phone = data['phone']
-        emit('verify_token_result', client_db.verify_token(token=token, phone=phone, sid=request.sid) , to=request.sid)
+        emit('verify_token_result', client_database.verify_token(token=token, phone=phone, sid=request.sid) , to=request.sid)
 
     def on_get_otp(self, data):
         phone = data['phone']
         otp = gen_otp()
-        client_post.phone_otp_pair[phone] = otp 
+        client_pos.phone_otp_pair[phone] = otp 
         
         if (system_states.SEND_OTP == None) :
             # send_otp(phone=phone, otp=otp)
             logger.warning('Phone : '+phone+' | OTP : '+otp)
 
-        if (system_states.SEND_OTP == 'TRUE') :
+        elif (system_states.SEND_OTP == 'TRUE') :
             send_otp(phone=phone, otp=otp)
         else:
             logger.warning('Phone : '+phone+' | OTP : '+otp)
@@ -68,16 +56,16 @@ class client_routes(Namespace) :
     def on_verify_otp(self, data) :
         phone = data['phone']
         otp = data['otp']
-        if (phone in client_post.phone_otp_pair) :
-            if (client_post.phone_otp_pair[phone] == otp) :
+        if (phone in client_pos.phone_otp_pair) :
+            if (client_pos.phone_otp_pair[phone] == otp) :
                 token = gen_token()
-                user = client_db.find_user(phone=phone)
+                user = client_database.find_user(phone=phone)
 
                 # Binding the request sid to the phone no
-                client_post.sid_phone_pair[request.sid] = phone 
+                client_pos.sid_phone_pair[request.sid] = phone 
 
                 if (user) :
-                    client_db.update_token(phone=phone, token=token)
+                    client_database.update_token(phone=phone, token=token)
                     if (user['name'] == '') :
                         emit ('verify_otp_result',{'status':'details_not_filled','token':token}, to=request.sid)
                     else :
@@ -86,7 +74,7 @@ class client_routes(Namespace) :
                                      'relation':user['relation'], 'dob':user['dob'], 'gender':user['gender']}
                         emit ('verify_otp_result',emit_data, to=request.sid)
                 else :
-                    client_db.add_user(phone=phone,token=token)
+                    client_database.add_client(phone=phone,token=token)
                     emit ('verify_otp_result',{'status':'details_not_filled', 'token':token}, to=request.sid)
             else :
                 emit('verify_otp_result', {'status':'Wrong OTP'} , to=request.sid)  
@@ -95,7 +83,7 @@ class client_routes(Namespace) :
 
     def on_add_details(self, data) :
         sid = request.sid 
-        if (sid in client_post.sid_phone_pair) :
+        if (sid in client_pos.sid_phone_pair) :
             name = data['name']
             dob = data['dob']
             blood_group = data['blood_group']
@@ -103,7 +91,7 @@ class client_routes(Namespace) :
             gender = data['gender']
             relation = data['relation']
             if (name and dob and blood_group and emergency_contact and relation) :
-                client_db.add_details(phone = client_post.sid_phone_pair[sid], name = name, blood_group = blood_group, 
+                client_database.add_details(phone = client_pos.sid_phone_pair[sid], name = name, blood_group = blood_group, 
                                       gender = gender, emergency_contact = emergency_contact, relation = relation, dob=dob)
                 emit('add_details_result',{'status':'success'})
             else :

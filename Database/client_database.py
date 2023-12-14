@@ -1,25 +1,28 @@
+# library imports
 from pymongo import MongoClient
 
-class SIDS_OTPS :
-    def __init__(self) -> None:
-        # self.phone_otp_pair = {'9553323388':'123456'}
-        # self.sid_phone_pair = {}
-        self.phone_otp_pair = {}
-        self.sid_phone_pair = {}
+# user-defined classes imports
+from Database.feedback_database import feedback_database
+from Database.admin_database import admin_database
 
-# P-->phone S->SID, O->OTP, T->TOKEN
-client_post = SIDS_OTPS()
+# variables imports
+from config import mongo_uri
+from Database.states_districts import state_district_pair_exists
+
+
+# POS ->  P : phone, O : OTP,  S : SID 
+class client_pos :
+    phone_otp_pair = {}
+    sid_phone_pair = {}
 
 class client_database :
-    def __init__(self, mongo_uri) -> None:
-        self.db = MongoClient(mongo_uri)['BachavSetu']['client']
-    
-    def verify_token(self, phone, token, sid) :
-        user = self.db.find_one({'phone':phone})
+    db = MongoClient(mongo_uri)['BachavSetu']['client']
+    def verify_token(phone, token, sid) :
+        user = client_database.db.find_one({'phone':phone})
         if (user) :
             if (token == user['token'] and token != '') :
                 # Binding sid to phone no
-                client_post.sid_phone_pair[sid] = phone
+                client_pos.sid_phone_pair[sid] = phone
 
                 if (user['name']!='') :
                     return {'status':'details_filled',
@@ -32,45 +35,27 @@ class client_database :
         else :
             return {'status':'user_doesn\'t_exist'}
         
-    def add_details(self, phone, name, dob, blood_group, gender, emergency_contact, relation) :
-        self.db.update_one({'phone':phone},{'$set':{'name':name, 'dob':dob, 'blood_group':blood_group,
+    def add_details(phone, name, dob, blood_group, gender, emergency_contact, relation) :
+        client_database.db.update_one({'phone':phone},{'$set':{'name':name, 'dob':dob, 'blood_group':blood_group,
                                                     'gender':gender, 'emergency_contact':emergency_contact,
                                                      'relation':relation }}) 
-    def find_user(self, phone) :
-        return self.db.find_one({'phone':phone})
+    def find_user(phone) :
+        return client_database.db.find_one({'phone':phone})
     
-    def update_token(self, phone, token) :
-        self.db.update_one({'phone':phone},{"$set" : {"token":token}})
+    def update_token(phone, token) :
+        client_database.db.update_one({'phone':phone},{"$set" : {"token":token}})
 
-    def add_user(self, phone, token) :
-        self.db.insert_one({'phone':phone, 'token':token , 
+    def add_client(phone, token) :
+        client_database.db.insert_one({'phone':phone, 'token':token , 
                             'name':'', 'dob':'', 'blood_group': '',
-                            'emergency_contact':'','relation':''})
+                            'emergency_contact':'','relation':'', 'feedback_ids' : []})
         
     # have to update this...
-    def submit_feedback(self, phone, feedback, state, district) :
-        if (state in states) :
-            if (district in districts) :
-                self.db.update_one({'phone':phone},{'$push':{'feedbacks':feedback}})
-                feedback_id = feedback_db.insert_one({'state':state, 'district':district, 'feedback':feedback, 'phone':phone}).inserted_id
-                admin_db.add_feedback(state = state, district = district, feedback_id = feedback_id)
-                rescue_db.add_feedback(state = state, district = district, feedback_id = feedback_id)
-            else :
-                return {'status':'Invalid district'}
+    def submit_feedback(phone, feedback, state, district) :
+        if state_district_pair_exists(state=state, district=district) :
+            feedback_id = feedback_database.add_feedback(phone=phone, district=district, state=state, feedback=feedback)
+            client_database.db.update_one({'phone':phone},{'$push':{'feedback_ids':feedback_id}})
+            admin_database.add_feedback(state = state, district = district, feedback_id = feedback_id)
+            return {'status':'Success'}
         else : 
-            return {'status':'Invalid State'}
-
-    # def user_exists(self, phone, type) :
-    #     collection = None
-    #     if (type == Type.ADMIN) :
-    #         collection = self.admin_collection
-    #     elif (type == Type.CLIENT) : 
-    #         collection = self.client_collection
-    #     elif (type == Type.RESCUE) :
-    #         collection = self.rescue_colletion
-    #     if (collection.find_one({'phone':phone})) :
-    #         return 1
-    #     else :
-    #         return 0
-
-    #LatLan(13.5553, 80.0267)
+            return {'status':'Invalid State or District or both'}
