@@ -20,8 +20,8 @@ def send_otp(otp, phone):
 def gen_token(token_length = 128):  
     return ''.join(choice(ascii_letters + digits) for _ in range(token_length))
 
-def gen_file_name(phone):
-    return phone+'_'+str(time())
+def gen_file_name(phone, extension):
+    return phone+'_'+str(time())+'.'+extension
 
 def hash_sha512(text) :
     obj = sha512()

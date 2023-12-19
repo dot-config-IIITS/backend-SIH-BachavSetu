@@ -127,10 +127,11 @@ class client_routes(Namespace) :
             coordinates = data['coordinates']
             type = data['type']
             state = data['state']
+            extension = data['extension']
             district = data['district']
             text = data['text']
 
-            file_name = gen_file_name(phone=phone)
+            file_name = gen_file_name(phone=phone, extension=extension)
             with open (file_name, 'wb') as file :
                 file.write(file_data)
             report_id = report_database.add_report(phone=phone, coordinates=coordinates, type=type, file_name=file_name, text=text)
