@@ -49,7 +49,7 @@ class client_database :
     def add_client(phone, token) :
         client_database.db.insert_one({'phone':phone, 'token':token , 
                             'name':'', 'dob':'', 'blood_group': '', 
-                            'emergency_contact':'','relation':'', 'feedback_ids' : []})
+                            'emergency_contact':'','relation':'', 'feedback_ids' : [], 'report_ids':[]})
         
     # have to update this...
     def submit_feedback(phone, feedback, state, district) :
