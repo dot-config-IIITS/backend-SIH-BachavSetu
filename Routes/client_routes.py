@@ -48,8 +48,10 @@ class client_routes(Namespace) :
 
     def on_disconnect(self) :
         sid = request.sid
+        print(client_pos.sid_phone_pair[sid],"got disconnected.")
         if (sid in client_pos.sid_phone_pair):
             client_pos.sid_phone_pair.pop(sid)
+        
 
     def on_verify_token(self, data) :
         token = data['token']
@@ -118,7 +120,11 @@ class client_routes(Namespace) :
         else :
             emit('add_details_result',{'status':'token not verified'}, to=request.sid)
 
+    # def on_ur_mom(self, data):
+    #     print("Why am I alive")
+
     def on_report_danger_site(self, data) :
+        print("RECIEVED REQUEST")
         sid = request.sid 
         if (sid in client_pos.sid_phone_pair):
             phone = client_pos.sid_phone_pair[sid]
@@ -134,8 +140,9 @@ class client_routes(Namespace) :
             file_name = gen_file_name(phone=phone, extension=extension)
             with open (file_name, 'wb') as file :
                 file.write(file_data)
+            print('file : '+file_name)
             report_id = report_database.add_report(phone=phone, coordinates=coordinates, type=type, file_name=file_name, text=text)
-            print(report_id)
+            # print(report_id)
             client_database.db.update_one({'phone':phone}, {'$push',{'report_ids':report_id}})
             # notify_danger_site(coordinates = coordinates, state= state, district = district, type = type, phone=phone, report_id = report_id)
 
