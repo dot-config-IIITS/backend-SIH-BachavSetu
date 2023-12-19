@@ -92,7 +92,7 @@ class client_routes(Namespace) :
                                      'relation':user['relation'], 'dob':user['dob'], 'gender':user['gender']}
                         emit ('verify_otp_result',emit_data, to=sid)
                 else :
-                    client_database.add_client(phone=phone,token=token, sid=sid)
+                    client_database.add_client(phone=phone,token=token)
                     emit ('verify_otp_result',{'status':'details_not_filled', 'token':token}, to=sid)
             else :
                 emit('verify_otp_result', {'status':'Wrong OTP'} , to=sid)  
@@ -135,6 +135,7 @@ class client_routes(Namespace) :
             with open (file_name, 'wb') as file :
                 file.write(file_data)
             report_id = report_database.add_report(phone=phone, coordinates=coordinates, type=type, file_name=file_name, text=text)
+            print(report_id)
             client_database.db.update_one({'phone':phone}, {'$push',{'report_ids':report_id}})
             # notify_danger_site(coordinates = coordinates, state= state, district = district, type = type, phone=phone, report_id = report_id)
 
