@@ -10,6 +10,10 @@ formatter = Formatter('%(message)s')
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 
+type_radius = { 'earthquake':10, 'cyclone' : 5, 'flood' : 10, 'wildfire' : 5,
+                'tornado' : 5, 'tsunami' : 10, 'domestic_fires' : 0.1,
+                'road_accident' : 0.1, 'land_slides':0.5, 'industrial_accident':1 }
+
 from os import environ
 class system_states :
     SEND_OTP = environ.get('SEND_OTP')

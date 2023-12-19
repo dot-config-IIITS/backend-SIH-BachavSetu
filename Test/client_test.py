@@ -27,6 +27,9 @@ def connect_to_server() :
     print("Connected to "+url)
 
 if __name__ == '__main__' :
+    sio.connect(url,namespaces='/')
+    sio.wait()
+
     connect_to_server()
 
     while (1) :

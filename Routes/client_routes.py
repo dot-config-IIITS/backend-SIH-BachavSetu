@@ -1,9 +1,26 @@
 from flask_socketio import Namespace, emit
 from flask import request 
+from os.path import exists 
+from os import makedirs
 
 from config import system_states, logger
-from Functions.functions import send_otp, gen_otp, gen_token
+from Functions.functions import send_otp, gen_otp, gen_token, gen_file_name
 from Database.client_database import client_database, client_pos
+from Database.report_database import report_database
+# from Routes.admin_routes import notify_danger_site
+
+# Could be optimized by asking for state, district, phone, token (make this requests..) 
+# Creating a client database, putting collections as state_district
+# Index documents with phone number 
+# Problem :- gotta look through all the documents in all the collections in the mongodb
+#            to check if the user registered with some other state and district 
+# Solution :- Webscrape https://tathya.uidai.gov.in/login and verify users via aadhar
+#             get their state, district from aadhar details..
+#             Now user cannot choose his/her state/district, these details are extracted from aadhar details..
+#             They just have to add blood_group now..
+# Don't have enough time for optimizations rn 😞
+
+# Gotta test searching for an indexed document in 18 Lakh documents (local as well as cloud)
 
 class client_routes(Namespace) :
 
@@ -56,30 +73,31 @@ class client_routes(Namespace) :
     def on_verify_otp(self, data) :
         phone = data['phone']
         otp = data['otp']
+        sid = request.sid
         if (phone in client_pos.phone_otp_pair) :
             if (client_pos.phone_otp_pair[phone] == otp) :
                 token = gen_token()
-                user = client_database.find_user(phone=phone)
+                user = client_database.find_client(phone=phone)
 
-                # Binding the request sid to the phone no
-                client_pos.sid_phone_pair[request.sid] = phone 
+                # Binding the request sid to the phone no                 
+                client_pos.sid_phone_pair[sid] = phone
 
                 if (user) :
                     client_database.update_token(phone=phone, token=token)
                     if (user['name'] == '') :
-                        emit ('verify_otp_result',{'status':'details_not_filled','token':token}, to=request.sid)
+                        emit ('verify_otp_result',{'status':'details_not_filled','token':token}, to=sid)
                     else :
                         emit_data = {'status':'details_filled','token':token ,
                                      'name':user['name'], 'blood_group':user['blood_group'], 'emergency_contact':user['emergency_contact'],
                                      'relation':user['relation'], 'dob':user['dob'], 'gender':user['gender']}
-                        emit ('verify_otp_result',emit_data, to=request.sid)
+                        emit ('verify_otp_result',emit_data, to=sid)
                 else :
-                    client_database.add_client(phone=phone,token=token)
-                    emit ('verify_otp_result',{'status':'details_not_filled', 'token':token}, to=request.sid)
+                    client_database.add_client(phone=phone,token=token, sid=sid)
+                    emit ('verify_otp_result',{'status':'details_not_filled', 'token':token}, to=sid)
             else :
-                emit('verify_otp_result', {'status':'Wrong OTP'} , to=request.sid)  
+                emit('verify_otp_result', {'status':'Wrong OTP'} , to=sid)  
         else :
-            emit('verify_otp_result', {'status':'No OTP is sent to this phone no.'} , to=request.sid)  
+            emit('verify_otp_result', {'status':'No OTP is sent to this phone no.'} , to=sid)  
 
     def on_add_details(self, data) :
         sid = request.sid 
@@ -99,7 +117,36 @@ class client_routes(Namespace) :
 
         else :
             emit('add_details_result',{'status':'token not verified'}, to=request.sid)
-        
+
+    def on_report_danger_site(self, data) :
+        sid = request.sid 
+        if (sid in client_pos.sid_phone_pair):
+            phone = client_pos.sid_phone_pair[sid]
+            
+            file_data = data['file_data']
+            coordinates = data['coordinates']
+            type = data['type']
+            state = data['state']
+            district = data['district']
+            text = data['text']
+
+            file_name = gen_file_name(phone=phone)
+            with open (file_name, 'wb') as file :
+                file.write(file_data)
+            report_id = report_database.add_report(phone=phone, coordinates=coordinates, type=type, file_name=file_name, text=text)
+            client_database.db.update_one({'phone':phone}, {'$push',{'report_ids':report_id}})
+            # notify_danger_site(coordinates = coordinates, state= state, district = district, type = type, phone=phone, report_id = report_id)
+
+        else :
+            emit('report_danger_site_result',{'status' : 'Verify token first'})
+
+
+### Reports folder ..
+# All report-files, file name : id_time
+
+### reports collection
+# file-name, user id, coordinates, type
+
 # if (token exists) :
 #     try connecting to server with the token 
 #     if (status != 'auth_fail') :

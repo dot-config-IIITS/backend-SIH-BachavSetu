@@ -17,6 +17,7 @@ class client_pos :
 
 class client_database :
     db = MongoClient(mongo_uri)['BachavSetu']['client']
+    
     def verify_token(phone, token, sid) :
         user = client_database.db.find_one({'phone':phone})
         if (user) :
@@ -39,7 +40,7 @@ class client_database :
         client_database.db.update_one({'phone':phone},{'$set':{'name':name, 'dob':dob, 'blood_group':blood_group,
                                                     'gender':gender, 'emergency_contact':emergency_contact,
                                                      'relation':relation }}) 
-    def find_user(phone) :
+    def find_client(phone) :
         return client_database.db.find_one({'phone':phone})
     
     def update_token(phone, token) :
@@ -47,7 +48,7 @@ class client_database :
 
     def add_client(phone, token) :
         client_database.db.insert_one({'phone':phone, 'token':token , 
-                            'name':'', 'dob':'', 'blood_group': '',
+                            'name':'', 'dob':'', 'blood_group': '', 
                             'emergency_contact':'','relation':'', 'feedback_ids' : []})
         
     # have to update this...
