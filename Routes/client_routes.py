@@ -143,7 +143,7 @@ class client_routes(Namespace) :
             print('file : '+file_name)
             report_id = report_database.add_report(phone=phone, coordinates=coordinates, type=type, file_name=file_name, text=text)
             # print(report_id)
-            client_database.db.update_one({'phone':phone}, {'$push',{'report_ids':report_id}})
+            client_database.db.update_one({'phone':phone}, {'$push':{'report_ids':report_id}})
             # notify_danger_site(coordinates = coordinates, state= state, district = district, type = type, phone=phone, report_id = report_id)
 
         else :
